@@ -18,16 +18,35 @@ jobs:
       - name: Configurar gcloud
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Mapear usuario GitHub a email ISP Cloud
+        id: mapeo
+        run: |
+          declare -A USUARIOS
+          USUARIOS["angelavital7"]="angela.vital@ispcloudservices.com"
+          # Agrega aquí los demás cuando tengas sus usernames:
+          # USUARIOS["username-github"]="email@ispcloudservices.com"
+
+          ACTOR="${{ github.actor }}"
+          EMAIL="${USUARIOS[$ACTOR]}"
+
+          if [ -z "$EMAIL" ]; then
+            echo "❌ El usuario $ACTOR no tiene entorno de pruebas configurado"
+            exit 1
+          fi
+
+          echo "✅ Usuario: $ACTOR → $EMAIL"
+          echo "email=$EMAIL" >> $GITHUB_OUTPUT
+
       - name: Ejecutar pruebas customer-group
         run: |
           gcloud run jobs execute puppeteer-customer-group \
             --region us-east4 \
-            --update-env-vars USER_EMAIL="${{ secrets.QA_USER_EMAIL }}" \
+            --update-env-vars USER_EMAIL="${{ steps.mapeo.outputs.email }}" \
             --wait
 
       - name: Ejecutar pruebas quotation
         run: |
           gcloud run jobs execute puppeteer-quotation \
             --region us-east4 \
-            --update-env-vars USER_EMAIL="${{ secrets.QA_USER_EMAIL }}" \
+            --update-env-vars USER_EMAIL="${{ steps.mapeo.outputs.email }}" \
             --wait
