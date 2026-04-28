@@ -1,0 +1,33 @@
+name: QA Tests - Puppeteer
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  qa-tests:
+    name: Pruebas funcionales
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Autenticar en GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.CLAVE }}
+
+      - name: Configurar gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Ejecutar pruebas customer-group
+        run: |
+          gcloud run jobs execute puppeteer-customer-group \
+            --region us-east4 \
+            --update-env-vars USER_EMAIL="${{ secrets.QA_USER_EMAIL }}" \
+            --wait
+
+      - name: Ejecutar pruebas quotation
+        run: |
+          gcloud run jobs execute puppeteer-quotation \
+            --region us-east4 \
+            --update-env-vars USER_EMAIL="${{ secrets.QA_USER_EMAIL }}" \
+            --wait
