@@ -23,8 +23,7 @@ jobs:
         run: |
           declare -A USUARIOS
           USUARIOS["angelavital7"]="angela.vital@ispcloudservices.com"
-          # Agrega aquí los demás cuando tengas sus usernames:
-          # USUARIOS["username-github"]="email@ispcloudservices.com"
+         
 
           ACTOR="${{ github.actor }}"
           EMAIL="${USUARIOS[$ACTOR]}"
